@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício do Alien</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
+</head>
+
+<body>
+    <script>
+        // o que acontece aqui?
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        // o que essa parte faz?
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            physics: {
+                default:'arcade',
+                arcade: {
+                    gravity: {y: 300},
+                    //debug: true
+                }
+
+            }
+        };
+
+        // o que acontece aqui?
+        const game = new Phaser.Game(config);
+        var alien;
+        var teclado;
+        var foguin;
+        var plataforma;
+
+        function preload() {
+            this.load.image('bg', 'assets/bg.png');
+            this.load.image('jogador','assets/alienigena.png');
+            this.load.image('foguin','assets/turbo.png');
+            this.load.image('chao','assets/tijolos.png');
+            this.load.image('moeda','assets/moeda.png');
+        }
+
+        function create() {
+            // o que acontece aqui?
+            this.add.image(larguraJogo/2, alturaJogo/2, 'bg');
+
+            foguin = this.add.sprite(0,0,'foguin');
+            foguin.setVisible(false);
+
+            alien = this.physics.add.sprite(larguraJogo/2,0,'jogador');
+            alien.setCollideWorldBounds(true);
+
+            plataforma = this.physics.add.staticImage(larguraJogo/2,alturaJogo/2,'chao');
+            this.physics.add.collider(alien,plataforma);
+
+            teclado = this.input.keyboard.createCursorKeys();
+        }
+
+        function update() {
+            foguin.setVisible(false);
+            if(teclado.left.isDown){
+                alien.setVelocityX(-200);
+            }
+            else if(teclado.right.isDown){
+                alien.setVelocityX(200);
+            }
+            else{
+                alien.setVelocityX(0);
+            }
+
+            if(teclado.up.isDown){
+                alien.setVelocityY(-175);
+                foguin.setVisible(true);
+            }
+
+            foguin.x = alien.x;
+            foguin.y = alien.y + 60
+
+
+        }
+    </script>
+</body>
+</html>
