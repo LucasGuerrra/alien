@@ -48,19 +48,17 @@
         var pontuação = 0;
         var placar;
 
-
-
         //carregando as imagens para o site
         function preload() {
             this.load.image('bg', 'assets/bg.png');
             this.load.image('jogador','assets/alienigena.png');
             this.load.image('foguin','assets/turbo.png');
             this.load.image('chao','assets/tijolos.png');
+            this.load.image('chao2','assets/plataforma2.png');
             this.load.image('moeda','assets/moeda.png');
         }
-    
-        function create() {
 
+        function create() {
             //adicionando o background
             this.add.image(larguraJogo/2, alturaJogo/2, 'bg');
 
@@ -73,44 +71,29 @@
             alien.setCollideWorldBounds(true);
 
             //adicionando a plataforma e falando que ela consegue colidir com o personagem
-            plataforma = this.physics.add.image(larguraJogo/2,alturaJogo/3,'chao');
+            plataforma = this.physics.add.staticImage(larguraJogo/2,alturaJogo/3,'chao');
             this.physics.add.collider(alien,plataforma);
-            plataforma2 = this.physics.add.image(larguraJogo/2,alturaJogo/1.5,'chao').setFlip(true);
+            plataforma2 = this.physics.add.staticImage(larguraJogo/2,alturaJogo/1.5,'chao2');
+            this.physics.add.collider(alien,plataforma2);
 
             //adicionando a moeda e falando que ela consegue colidir com as bordas da tela, consegue quicar e que ela colide com a plataforma
             moeda = this.physics.add.image(larguraJogo/2,25,'moeda');
             moeda.setCollideWorldBounds(true);
             moeda.setBounce(0.3);
             this.physics.add.collider(moeda,plataforma);
+            this.physics.add.collider(moeda,plataforma2);
 
             //adicionando o placar no canto da tela
             placar = this.add.text(50,50, 'Moedas:'+pontuação,{fontSize:'45px',fill:'#D60270'})
 
             //criando uma função que quando o alien e moeda se encontram ela some, aparece em um lugar aleatório x no topo da tela, acresenta mais um pra pontuação e aparece denovo
             this.physics.add.overlap(alien,moeda,function(){
-                
                 moeda.setVisible(false);
                 moeda.setPosition(Phaser.Math.RND.between(50, 650), 100);
                 moeda.setVelocityY(0);
                 pontuação += 1;
                 placar.setText('Moedas:'+ pontuação);
                 moeda.setVisible(true);
-                if(pontuação%2 == 0){
-                    plataforma2.setVisible(true);
-                    this.physics.add.collider(alien,plataforma2);
-                    this.physics.add.collider(moeda,plataforma2);
-                    plataforma.setVisible(false);
-                    this.physics.remove.collider(alien,plataforma);
-                    this.physics.remove.collider(moeda,plataforma);
-                }
-                else{
-                    plataforma.setVisible(true);
-                    this.physics.add.collider(alien,plataforma);
-                    this.physics.add.collider(moeda,plataforma);
-                    plataforma2.setVisible(false);
-                    this.physics.remove.collider(alien,plataforma2);
-                    this.physics.remove.collider(moeda,plataforma2);
-                }
             });
 
             //definindo o input do teclado
