@@ -10,11 +10,11 @@
 
 <body>
     <script>
-        // o que acontece aqui?
+        //cria constantes para a servirem como a altura e a largura do jogo
         const larguraJogo = 700;
         const alturaJogo = 850;
 
-        // o que essa parte faz?
+        //definindo as configurações do jogo, como a largura/altura da tela, as funções da cena e a gravidade
         const config = {
             type: Phaser.AUTO,
             width: larguraJogo,
@@ -29,19 +29,28 @@
                 default:'arcade',
                 arcade: {
                     gravity: {y: 300},
-                    //debug: true
+                    debug: true
                 }
 
             }
         };
 
-        // o que acontece aqui?
+        // iniciando o jogo com as configurações previamente selecionadas
         const game = new Phaser.Game(config);
+
+        //definindo as variáveis que vão ser utilizadas pelo resto do código
         var alien;
         var teclado;
         var foguin;
         var plataforma;
+        var plataforma2;
+        var moeda;
+        var pontuação = 0;
+        var placar;
 
+
+
+        //carregando as imagens para o site
         function preload() {
             this.load.image('bg', 'assets/bg.png');
             this.load.image('jogador','assets/alienigena.png');
@@ -49,40 +58,87 @@
             this.load.image('chao','assets/tijolos.png');
             this.load.image('moeda','assets/moeda.png');
         }
-
+    
         function create() {
-            // o que acontece aqui?
+
+            //adicionando o background
             this.add.image(larguraJogo/2, alturaJogo/2, 'bg');
 
+            //adicionando o fogo do boost da nave e definindo ele como invisível
             foguin = this.add.sprite(0,0,'foguin');
             foguin.setVisible(false);
 
+            //adicionandoo personagem e falando que ele consegue colidir com as boradas da tela
             alien = this.physics.add.sprite(larguraJogo/2,0,'jogador');
             alien.setCollideWorldBounds(true);
 
-            plataforma = this.physics.add.staticImage(larguraJogo/2,alturaJogo/2,'chao');
+            //adicionando a plataforma e falando que ela consegue colidir com o personagem
+            plataforma = this.physics.add.image(larguraJogo/2,alturaJogo/3,'chao');
             this.physics.add.collider(alien,plataforma);
+            plataforma2 = this.physics.add.image(larguraJogo/2,alturaJogo/1.5,'chao').setFlip(true);
 
+            //adicionando a moeda e falando que ela consegue colidir com as bordas da tela, consegue quicar e que ela colide com a plataforma
+            moeda = this.physics.add.image(larguraJogo/2,25,'moeda');
+            moeda.setCollideWorldBounds(true);
+            moeda.setBounce(0.3);
+            this.physics.add.collider(moeda,plataforma);
+
+            //adicionando o placar no canto da tela
+            placar = this.add.text(50,50, 'Moedas:'+pontuação,{fontSize:'45px',fill:'#D60270'})
+
+            //criando uma função que quando o alien e moeda se encontram ela some, aparece em um lugar aleatório x no topo da tela, acresenta mais um pra pontuação e aparece denovo
+            this.physics.add.overlap(alien,moeda,function(){
+                
+                moeda.setVisible(false);
+                moeda.setPosition(Phaser.Math.RND.between(50, 650), 100);
+                moeda.setVelocityY(0);
+                pontuação += 1;
+                placar.setText('Moedas:'+ pontuação);
+                moeda.setVisible(true);
+                if(pontuação%2 == 0){
+                    plataforma2.setVisible(true);
+                    this.physics.add.collider(alien,plataforma2);
+                    this.physics.add.collider(moeda,plataforma2);
+                    plataforma.setVisible(false);
+                    this.physics.remove.collider(alien,plataforma);
+                    this.physics.remove.collider(moeda,plataforma);
+                }
+                else{
+                    plataforma.setVisible(true);
+                    this.physics.add.collider(alien,plataforma);
+                    this.physics.add.collider(moeda,plataforma);
+                    plataforma2.setVisible(false);
+                    this.physics.remove.collider(alien,plataforma2);
+                    this.physics.remove.collider(moeda,plataforma2);
+                }
+            });
+
+            //definindo o input do teclado
             teclado = this.input.keyboard.createCursorKeys();
         }
 
         function update() {
+            //falando para o fogo não aparecer ainda
             foguin.setVisible(false);
+
+            //quando apertar a seta da esquerda ele se move para a esquerda
             if(teclado.left.isDown){
-                alien.setVelocityX(-200);
-            }
+                alien.setVelocityX(-300);
+            }//quando apertar a seta da direita ele se move para a direita
             else if(teclado.right.isDown){
-                alien.setVelocityX(200);
-            }
+                alien.setVelocityX(300);
+            }//se nenhuma das duas acima são apertadas ele apenas cai
             else{
                 alien.setVelocityX(0);
             }
 
+            //quando apertar a seta de cima ele se move para cima e o fogunho aparece
             if(teclado.up.isDown){
                 alien.setVelocityY(-175);
                 foguin.setVisible(true);
             }
-
+            
+            //definindo que o foguinhoi tem que seguir a nave
             foguin.x = alien.x;
             foguin.y = alien.y + 60
 
